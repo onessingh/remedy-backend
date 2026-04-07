@@ -114,8 +114,10 @@ router.get('/me', (req, res) => {
       user: { id, name, email, photo, provider }
     });
   } else {
-    return res.json({ 
-      authenticated: false 
+    // ✅ Change to 401 for better frontend detection
+    return res.status(401).json({ 
+      authenticated: false,
+      message: 'Not authenticated'
     });
   }
 });
