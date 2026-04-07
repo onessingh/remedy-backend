@@ -1,18 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const nodemailer = require('nodemailer');
-
-// Create transporter for direct email sending
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT) || 587, // Ensure port is an integer
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    }
-});
+const { sendConsultationEmails } = require('../utils/mailer');
 
 // POST /api/consult/book - Handle consultation form submission
 router.post('/book', async (req, res) => {
@@ -33,32 +22,9 @@ router.post('/book', async (req, res) => {
             [name, email, phone, concern]
         );
 
-        // Prepare email notification
-        const mailOptions = {
-            from: `"Home Remedies" <${process.env.SMTP_USER}>`,
-            to: process.env.ADMIN_EMAIL || process.env.SMTP_USER, // Fallback to sender's email if admin email not set
-            subject: `New Consultation Request from ${name}`,
-            text: `
-                New consultation request details:
-                Name: ${name}
-                Email: ${email}
-                Phone: ${phone}
-                Concern: ${concern}
-                Date: ${new Date().toLocaleString()}
-            `,
-            html: `
-                <h1>New Consultation Request</h1>
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Phone:</strong> ${phone}</p>
-                <p><strong>Concern:</strong> ${concern}</p>
-                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
-            `
-        };
-
-        // Attempt to send email but don't wait for it (prevent 504 timeout)
-        transporter.sendMail(mailOptions).then(() => {
-            console.log('✅ Consultation email sent.');
+        // Attempt to send emails but don't wait for them (prevent 504 timeout)
+        sendConsultationEmails(name, email, phone, concern).then(() => {
+            console.log('✅ Consultation emails sent (Admin + Customer).');
         }).catch(mailErr => {
             console.error('📧 Email sending error (booking saved to DB):', mailErr);
         });

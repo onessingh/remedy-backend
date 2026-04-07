@@ -81,4 +81,66 @@ function sendNotificationEmail(email, type, details = {}) {
     return transporter.sendMail(mailOptions);
 }
 
-module.exports = { sendOTP, sendPasswordResetConfirmation, sendNotificationEmail };
+// Consultation Emails (Admin Notification + Customer Confirmation)
+function sendConsultationEmails(name, email, phone, concern) {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+    const date = new Date().toLocaleString();
+
+    // 1. Notification to Admin
+    const adminMailOptions = {
+        from: `"Remedy & Blog Hub" <${process.env.SMTP_USER}>`,
+        to: adminEmail,
+        subject: `🚨 New Consultation Request from ${name}`,
+        text: `
+            New consultation request received:
+            Name: ${name}
+            Email: ${email}
+            Phone: ${phone}
+            Concern: ${concern}
+            Date: ${date}
+        `,
+        html: `
+            <div style="font-family: sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
+                <h2 style="color: #2c3e50;">New Consultation Request</h2>
+                <hr>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${phone}</p>
+                <p><strong>Concern:</strong> ${concern}</p>
+                <p><strong>Date:</strong> ${date}</p>
+                <hr>
+                <p style="font-size: 0.9em; color: #7f8c8d;">Please contact the patient as soon as possible.</p>
+            </div>
+        `
+    };
+
+    // 2. Confirmation to Customer
+    const customerMailOptions = {
+        from: `"Home Remedies" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: `Confirmation: Appointment Request Received`,
+        html: `
+            <div style="font-family: sans-serif; padding: 20px;">
+                <h2 style="color: #27ae60;">Hello ${name},</h2>
+                <p>Thank you for reaching out to us. We have received your consultation request regarding: <strong>"${concern}"</strong>.</p>
+                <p>Our team will review your details and contact you via phone (<strong>${phone}</strong>) or email shortly to confirm your appointment time.</p>
+                <br>
+                <p>Best Regards,</p>
+                <p><strong>Remedy & Blog Hub Team</strong></p>
+            </div>
+        `
+    };
+
+    // Send both
+    const adminPromise = transporter.sendMail(adminMailOptions);
+    const customerPromise = transporter.sendMail(customerMailOptions);
+
+    return Promise.all([adminPromise, customerPromise]);
+}
+
+module.exports = { 
+    sendOTP, 
+    sendPasswordResetConfirmation, 
+    sendNotificationEmail,
+    sendConsultationEmails 
+};
