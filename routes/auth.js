@@ -83,9 +83,9 @@ router.post('/login', async (req, res, next) => {
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/signin-page/signin.html' }),
+  passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL || ''}/signin-page/signin.html` }),
   (req, res) => {
-    res.redirect('/signin-page/signin.html?social=google');
+    res.redirect(`${process.env.FRONTEND_URL || ''}/signin-page/signin.html?social=google`);
   }
 );
 
@@ -93,9 +93,9 @@ router.get('/auth/google/callback',
 router.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 
 router.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/signin-page/signin.html' }),
+  passport.authenticate('facebook', { failureRedirect: `${process.env.FRONTEND_URL || ''}/signin-page/signin.html` }),
   (req, res) => {
-    res.redirect('/signin-page/signin.html?social=facebook');
+    res.redirect(`${process.env.FRONTEND_URL || ''}/signin-page/signin.html?social=facebook`);
   }
 );
 
