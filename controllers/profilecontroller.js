@@ -71,7 +71,8 @@ exports.forgotPassword = async (req, res) => {
     );
 
     // Create reset link
-    const resetLink = `http://localhost:5000/reset-password/${token}`;
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const resetLink = `${backendUrl}/reset-password/${token}`;
 
 
     // Send email using nodemailer

@@ -31,7 +31,8 @@ router.post('/forgot-password', async (req, res) => {
         );
 
         // Send reset link via email
-        const resetLink = `http://localhost:5000/reset-password/${token}`; // Use localhost for development
+        const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+        const resetLink = `${backendUrl}/reset-password/${token}`;
         const mailOptions = {
             from: process.env.SMTP_USER,
             to: email,
