@@ -83,9 +83,12 @@ router.post('/login', async (req, res, next) => {
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL || ''}/signin-page/signin.html` }),
+  passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL && process.env.FRONTEND_URL.startsWith('http') ? process.env.FRONTEND_URL : `https://${process.env.FRONTEND_URL}`}/signin-page/signin.html` }),
   (req, res) => {
-    res.redirect(`${process.env.FRONTEND_URL || ''}/signin-page/signin.html?social=google`);
+    const frontendUrl = process.env.FRONTEND_URL && process.env.FRONTEND_URL.startsWith('http') 
+                        ? process.env.FRONTEND_URL 
+                        : `https://${process.env.FRONTEND_URL}`;
+    res.redirect(`${frontendUrl}/signin-page/signin.html?social=google`);
   }
 );
 
@@ -93,9 +96,12 @@ router.get('/auth/google/callback',
 router.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 
 router.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: `${process.env.FRONTEND_URL || ''}/signin-page/signin.html` }),
+  passport.authenticate('facebook', { failureRedirect: `${process.env.FRONTEND_URL && process.env.FRONTEND_URL.startsWith('http') ? process.env.FRONTEND_URL : `https://${process.env.FRONTEND_URL}`}/signin-page/signin.html` }),
   (req, res) => {
-    res.redirect(`${process.env.FRONTEND_URL || ''}/signin-page/signin.html?social=facebook`);
+    const frontendUrl = process.env.FRONTEND_URL && process.env.FRONTEND_URL.startsWith('http') 
+                        ? process.env.FRONTEND_URL 
+                        : `https://${process.env.FRONTEND_URL}`;
+    res.redirect(`${frontendUrl}/signin-page/signin.html?social=facebook`);
   }
 );
 
