@@ -56,13 +56,12 @@ router.post('/book', async (req, res) => {
             `
         };
 
-        // Attempt to send email but don't fail the whole request if it fails
-        try {
-            await transporter.sendMail(mailOptions);
+        // Attempt to send email but don't wait for it (prevent 504 timeout)
+        transporter.sendMail(mailOptions).then(() => {
             console.log('✅ Consultation email sent.');
-        } catch (mailErr) {
+        }).catch(mailErr => {
             console.error('📧 Email sending error (booking saved to DB):', mailErr);
-        }
+        });
 
         res.json({ 
             success: true, 
