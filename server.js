@@ -74,7 +74,7 @@ app.use('/forgot-password', forgotPasswordRoutes);
 app.use(authStatusRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/consult', consultRoutes); // Add this line
+app.use('/api/consult', consultRoutes); 
 app.use('/api/user', searchRoutes);
 // ✅ Logout route
 app.post('/logout', (req, res, next) => {
