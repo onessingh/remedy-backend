@@ -31,11 +31,18 @@ passport.use(new GoogleStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     const email = profile.emails?.[0]?.value;
+    const photo = profile.photos?.[0]?.value; // ✅ Extract Google profile photo
     if (!email) return done(new Error('Google email not available'));
 
     const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
     if (users.length > 0) {
+      // ✅ Update photo/profileImage if missing
+      if ((!users[0].photo || !users[0].profileImage) && photo) {
+        await db.query('UPDATE users SET photo = ?, profileImage = ? WHERE id = ?', [photo, photo, users[0].id]);
+        users[0].photo = photo;
+        users[0].profileImage = photo;
+      }
       done(null, users[0]);
     } else {
       const hashed = await bcrypt.hash('SOCIAL_LOGIN', 10);
@@ -43,7 +50,9 @@ passport.use(new GoogleStrategy({
         name: profile.displayName,
         email,
         provider: 'google',
-        password: hashed
+        password: hashed,
+        photo, // ✅ Save profile photo URL
+        profileImage: photo // ✅ Save to profileImage too (frontend expects this)
       };
       const [result] = await db.query('INSERT INTO users SET ?', newUser);
       newUser.id = result.insertId;
@@ -59,11 +68,12 @@ passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
   callbackURL: (process.env.FRONTEND_URL || 'http://localhost:5000') + '/auth/facebook/callback',
-  profileFields: ['id', 'displayName', 'emails'], // Ensure email is requested
+  profileFields: ['id', 'displayName', 'emails', 'photos'], // ✅ Ensure photos are requested
   proxy: true // ✅ Trust Proxy for Render/Proxy environments
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let email = profile.emails?.[0]?.value;
+    const photo = profile.photos?.[0]?.value; // ✅ Extract Facebook profile photo
 
     // ✅ Fallback email if not provided
     if (!email) {
@@ -73,6 +83,12 @@ passport.use(new FacebookStrategy({
     const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
     if (users.length > 0) {
+      // ✅ Update photo/profileImage if missing
+      if ((!users[0].photo || !users[0].profileImage) && photo) {
+        await db.query('UPDATE users SET photo = ?, profileImage = ? WHERE id = ?', [photo, photo, users[0].id]);
+        users[0].photo = photo;
+        users[0].profileImage = photo;
+      }
       done(null, users[0]);
     } else {
       const hashed = await bcrypt.hash('SOCIAL_LOGIN', 10);
@@ -80,7 +96,9 @@ passport.use(new FacebookStrategy({
         name: profile.displayName,
         email,
         provider: 'facebook',
-        password: hashed
+        password: hashed,
+        photo, // ✅ Save profile photo URL
+        profileImage: photo // ✅ Save to profileImage too (frontend expects this)
       };
       const [result] = await db.query('INSERT INTO users SET ?', newUser);
       newUser.id = result.insertId;

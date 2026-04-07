@@ -68,6 +68,7 @@ router.post('/login', async (req, res, next) => {
           name: user.name,
           email: user.email,
           photo: user.photo,
+          profileImage: user.profileImage, // ✅ Explicitly include profileImage
           provider: user.provider
         }
       });
@@ -108,10 +109,10 @@ router.get('/auth/facebook/callback',
 // ========== GET LOGGED-IN USER ==========
 router.get('/me', (req, res) => {
   if (req.isAuthenticated()) {
-    const { id, name, email, photo, provider } = req.user;
+    const { id, name, email, photo, profileImage, provider } = req.user;
     return res.json({ 
       authenticated: true,
-      user: { id, name, email, photo, provider }
+      user: { id, name, email, photo, profileImage, provider }
     });
   } else {
     // ✅ Change to 401 for better frontend detection

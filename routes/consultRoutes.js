@@ -6,7 +6,7 @@ const nodemailer = require('nodemailer');
 // Create transporter for direct email sending
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
+    port: parseInt(process.env.SMTP_PORT) || 587, // Ensure port is an integer
     secure: false, // true for 465, false for other ports
     auth: {
         user: process.env.SMTP_USER,
@@ -27,16 +27,16 @@ router.post('/book', async (req, res) => {
             });
         }
 
-        // Save to database
+        // Save to database first
         const [result] = await db.query(
             "INSERT INTO consultations (name, email, phone, concern) VALUES (?, ?, ?, ?)",
             [name, email, phone, concern]
         );
 
-        // Send email notification
+        // Prepare email notification
         const mailOptions = {
             from: `"Home Remedies" <${process.env.SMTP_USER}>`,
-            to: process.env.ADMIN_EMAIL || 'your-email@gmail.com',
+            to: process.env.ADMIN_EMAIL || process.env.SMTP_USER, // Fallback to sender's email if admin email not set
             subject: `New Consultation Request from ${name}`,
             text: `
                 New consultation request details:
@@ -56,7 +56,13 @@ router.post('/book', async (req, res) => {
             `
         };
 
-        await transporter.sendMail(mailOptions);
+        // Attempt to send email but don't fail the whole request if it fails
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log('✅ Consultation email sent.');
+        } catch (mailErr) {
+            console.error('📧 Email sending error (booking saved to DB):', mailErr);
+        }
 
         res.json({ 
             success: true, 
@@ -65,7 +71,7 @@ router.post('/book', async (req, res) => {
         });
 
     } catch (err) {
-        console.error('Consultation booking error:', err);
+        console.error('❌ Consultation booking error:', err);
         res.status(500).json({ 
             success: false,
             error: "Failed to book appointment",
