@@ -26,7 +26,8 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: '/auth/google/callback'
+  callbackURL: (process.env.BACKEND_URL || 'http://localhost:5000') + '/auth/google/callback',
+  proxy: true // ✅ Trust Proxy for Render/Proxy environments
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     const email = profile.emails?.[0]?.value;
@@ -57,8 +58,9 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: '/auth/facebook/callback',
-  profileFields: ['id', 'displayName', 'emails'] // Ensure email is requested
+  callbackURL: (process.env.BACKEND_URL || 'http://localhost:5000') + '/auth/facebook/callback',
+  profileFields: ['id', 'displayName', 'emails'], // Ensure email is requested
+  proxy: true // ✅ Trust Proxy for Render/Proxy environments
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let email = profile.emails?.[0]?.value;
