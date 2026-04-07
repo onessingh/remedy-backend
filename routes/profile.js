@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { updateProfile, changePassword, forgotPassword } = require('../controllers/profilecontroller');
-const upload = require('../middlewares/uploadMiddleware');
+const upload = require('../middlewares/uploadmiddleware');
 
 // Middleware to check login
 function isAuthenticated(req, res, next) {

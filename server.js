@@ -4,6 +4,7 @@ const passport = require('passport');
 const dotenv = require('dotenv');
 const path = require('path');
 const cors = require('cors');
+const https = require('https');
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const forgotPasswordRoutes = require('./routes/forgotpassword');
@@ -91,6 +92,11 @@ app.get("/reset-password/:token", (req, res) => {
     res.sendFile(path.join(__dirname, "..", "public", "resetpassword", "reset-password.html"));
 });
 
+// ✅ Health Check Route (Required for keep-alive pings)
+app.get('/api/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // ✅ Email Test Route
 app.get("/test-email", async (req, res) => {
     const transporter = nodemailer.createTransport({
@@ -131,4 +137,15 @@ app.get("/test-email", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
+
+    // ✅ Keep-alive pinging (Every 14 minutes to reset Render's 15m sleep timer)
+    if (process.env.BACKEND_URL) {
+        setInterval(() => {
+            https.get(`${process.env.BACKEND_URL}/api/health`, (res) => {
+                console.log(`🔄 Self-ping (Keep-alive) status: ${res.statusCode}`);
+            }).on('error', (err) => {
+                console.error(`❌ Self-ping error: ${err.message}`);
+            });
+        }, 14 * 60 * 1000); // 14 mins
+    }
 });
