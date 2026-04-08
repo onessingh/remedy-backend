@@ -148,4 +148,14 @@ app.listen(PORT, () => {
             });
         }, 14 * 60 * 1000); // 14 mins
     }
+
+    // ✅ Database Keep-alive (Every 10 minutes to prevent hibernation)
+    setInterval(async () => {
+        try {
+            await db.query('SELECT 1');
+            console.log('📦 Database keep-alive ping successful');
+        } catch (err) {
+            console.error('❌ Database keep-alive ping failed:', err.message);
+        }
+    }, 10 * 60 * 1000); // 10 minutes
 });
