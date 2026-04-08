@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const cors = require('cors');
 const https = require('https');
+const http = require('http');
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const forgotPasswordRoutes = require('./routes/forgotpassword');
@@ -139,15 +140,13 @@ app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 
     // ✅ Keep-alive pinging (Every 14 minutes to reset Render's 15m sleep timer)
-    if (process.env.BACKEND_URL) {
-        setInterval(() => {
-            https.get(`${process.env.BACKEND_URL}/api/health`, (res) => {
-                console.log(`🔄 Self-ping (Keep-alive) status: ${res.statusCode}`);
-            }).on('error', (err) => {
-                console.error(`❌ Self-ping error: ${err.message}`);
-            });
-        }, 14 * 60 * 1000); // 14 mins
-    }
+    setInterval(() => {
+        http.get(`http://localhost:${PORT}/api/health`, (res) => {
+            console.log(`🔄 Local self-ping status: ${res.statusCode}`);
+        }).on('error', (err) => {
+            console.error(`❌ Local self-ping error: ${err.message}`);
+        });
+    }, 14 * 60 * 1000); // 14 mins
 
     // ✅ Database Keep-alive (Every 10 minutes to prevent hibernation)
     setInterval(async () => {
