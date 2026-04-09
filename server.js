@@ -139,14 +139,18 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 
-    // ✅ Keep-alive pinging (Every 14 minutes to reset Render's 15m sleep timer)
+    // ✅ Robust Keep-alive pinging (Every 5 minutes to prevent Render's free tier from sleeping)
+    const rawUrl = process.env.BACKEND_URL || `http://localhost:${PORT}`;
+    const healthUrl = `${rawUrl.replace(/\/$/, '')}/api/health`;
+
     setInterval(() => {
-        http.get(`http://localhost:${PORT}/api/health`, (res) => {
-            console.log(`🔄 Local self-ping status: ${res.statusCode}`);
+        const protocol = healthUrl.startsWith('https') ? https : http;
+        protocol.get(healthUrl, (res) => {
+            console.log(`🔄 Keep-alive ping (${healthUrl}): ${res.statusCode}`);
         }).on('error', (err) => {
-            console.error(`❌ Local self-ping error: ${err.message}`);
+            console.error(`❌ Keep-alive ping error (${healthUrl}): ${err.message}`);
         });
-    }, 14 * 60 * 1000); // 14 mins
+    }, 5 * 60 * 1000); // 5 minutes (to fix Render cold start)
 
     // ✅ Database Keep-alive (Every 10 minutes to prevent hibernation)
     setInterval(async () => {
