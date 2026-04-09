@@ -100,26 +100,18 @@ app.get('/api/health', (req, res) => {
 
 // ✅ Email Test Route
 app.get("/test-email", async (req, res) => {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-        },
-        tls: { rejectUnauthorized: false }
-    });
-
+    const { sendEmailViaBrevo } = require('./utils/mailer');
+    
     try {
-        await transporter.sendMail({
-            from: `"Remedy & Blog Hub" <${process.env.SMTP_USER}>`,
+        await sendEmailViaBrevo({
             to: "rajthakur221206@gmail.com",
-            subject: "✅ Test Email",
-            html: "<p>This is a test email from your Remedy & Blog Hub server setup.</p>"
+            subject: "✅ Brevo Test Email",
+            htmlContent: "<p>This is a test email using <strong>Brevo HTTP API</strong> from your Remedy & Blog Hub server setup. This bypasses the SMTP port block.</p>"
         });
-        res.send("✅ Test email sent! Check your inbox.");
+        res.send("✅ Test email sent via Brevo! Check your inbox.");
     } catch (err) {
-        console.error("❌ Test email error:", err);
-        res.status(500).send("❌ Failed to send test email.");
+        console.error("❌ Brevo Test email error:", err);
+        res.status(500).send(`❌ Failed to send test email: ${err.message}`);
     }
 });
 
