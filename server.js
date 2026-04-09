@@ -145,10 +145,18 @@ app.listen(PORT, () => {
 
     setInterval(() => {
         const protocol = healthUrl.startsWith('https') ? https : http;
-        protocol.get(healthUrl, (res) => {
+        const req = protocol.get(healthUrl, (res) => {
+            res.resume(); // ✅ Essential to consume response and free up the socket pool
             console.log(`🔄 Keep-alive ping (${healthUrl}): ${res.statusCode}`);
-        }).on('error', (err) => {
+        });
+        
+        req.on('error', (err) => {
             console.error(`❌ Keep-alive ping error (${healthUrl}): ${err.message}`);
+        });
+
+        // Set a 10-second timeout for the ping request
+        req.setTimeout(10000, () => {
+            req.destroy();
         });
     }, 5 * 60 * 1000); // 5 minutes (to fix Render cold start)
 
