@@ -2,7 +2,7 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { sendOTP } = require('../utils/mailer');
 
 exports.updateProfile = async (req, res) => {
   try {
@@ -75,25 +75,20 @@ exports.forgotPassword = async (req, res) => {
     const resetLink = `${backendUrl}/reset-password/${token}`;
 
 
-    // Send email using nodemailer
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-
-    await transporter.sendMail({
-      from: `"Remedy Hub" <${process.env.SMTP_USER}>`,
-      to: email,
+    // Send email using optimized Brevo mailer in background
+    const mailOptions = {
       subject: "Reset Your Password",
       html: `
         <p>Hi ${rows[0].name},</p>
         <p>Click below to reset your password:</p>
         <a href="${resetLink}">${resetLink}</a>
         <p>This link will expire in 15 minutes.</p>
-      `
+      `,
+      text: `Hi ${rows[0].name}, Click here to reset your password: ${resetLink}. This link will expire in 15 minutes.`
+    };
+
+    sendOTP(email, mailOptions).catch(err => {
+      console.error("❌ Background Email Error (profilecontroller):", err);
     });
 
     res.status(200).json({ message: "Reset email sent successfully!" });
