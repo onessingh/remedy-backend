@@ -31,8 +31,9 @@ router.post('/forgot-password', async (req, res) => {
         );
 
         // Send reset link via email
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
-        const resetLink = `${backendUrl}/reset-password/${token}`;
+        // Send reset link pointing to the Netlify Frontend
+        const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5500').replace(/\/$/, '');
+        const resetLink = `${frontendUrl}/resetpassword/reset-password.html?token=${token}`;
         const mailOptions = {
             from: process.env.SMTP_USER,
             to: email,
