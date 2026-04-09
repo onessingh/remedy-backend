@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
 // ✅ Routes
 app.use('/', authRoutes);
 app.use('/profile', profileRoutes);
-app.use('/forgot-password', forgotPasswordRoutes);
+app.use('/api', forgotPasswordRoutes);
 app.use(authStatusRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/user', userRoutes);
