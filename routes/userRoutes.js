@@ -252,7 +252,9 @@ router.put('/profile', ensureAuthenticated, upload.single('profileImage'), async
         if (twitter !== undefined) updates.twitter = twitter.trim();
 
         if (req.file) {
-            updates.profileImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+            const dataUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+            updates.profileImage = dataUrl;
+            updates.photo = dataUrl; // Keep both columns synced
         }
 
         if (Object.keys(updates).length === 0 && !req.file) {
