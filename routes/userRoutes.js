@@ -42,9 +42,29 @@ function ensureAuthenticated(req, res, next) {
 // Sanitize content to remove unwanted HTML tags and attributes
 function sanitizeContent(content) {
     return sanitizeHtml(content, {
-        allowedTags: ['p', 'strong', 'em', 'a', 'ul', 'ol', 'li'],
+        allowedTags: [
+            'p', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'br', 'div', 
+            'span', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
+            'blockquote', 'font', 'b', 'i'
+        ],
         allowedAttributes: {
-            a: ['href']
+            'a': ['href', 'target', 'rel'],
+            'span': ['style', 'class'],
+            'p': ['style', 'class'],
+            'div': ['style', 'class'],
+            'font': ['color', 'size', 'face'],
+            '*': ['style'] // Allow inline styles for colors, alignment, etc.
+        },
+        allowedStyles: {
+            '*': {
+                'color': [/.*/],
+                'background-color': [/.*/],
+                'text-align': [/.*/],
+                'font-size': [/.*/],
+                'font-family': [/.*/],
+                'font-weight': [/.*/],
+                'text-decoration': [/.*/]
+            }
         }
     });
 }
