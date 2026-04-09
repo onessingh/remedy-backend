@@ -101,9 +101,7 @@ app.get('/api/health', (req, res) => {
 // ✅ Email Test Route
 app.get("/test-email", async (req, res) => {
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: 465,
-        secure: true,
+        service: 'gmail',
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
