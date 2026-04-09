@@ -72,13 +72,14 @@ function sanitizeContent(content) {
 // GET /api/user - Basic user info
 router.get('/', (req, res) => {
     if (req.isAuthenticated() && req.user) {
+        const profileImage = req.user.profileImage || req.user.photo;
         return res.json({
             id: req.user.id,
             name: req.user.name,
             email: req.user.email,
             photo: req.user.photo,
             profileName: req.user.profileName,
-            profileImage: req.user.profileImage
+            profileImage: profileImage
         });
     }
     res.status(401).json({ error: 'Not authenticated' });
@@ -159,7 +160,7 @@ router.get('/profile', ensureAuthenticated, async (req, res) => {
 
     try {
         const [userRows] = await db.query(
-            `SELECT id, profileName, profileImage, bio, achievements, 
+            `SELECT id, profileName, COALESCE(profileImage, photo) as profileImage, photo, bio, achievements, 
                     linkedin, github, twitter 
              FROM users WHERE id = ?`, 
             [requestedUserId]

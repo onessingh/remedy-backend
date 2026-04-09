@@ -9,9 +9,10 @@ exports.updateProfile = async (req, res) => {
     const name = req.body?.name?.trim() || req.user.name;
     const photo = req.file ? req.file.filename : req.user.photo;
 
-    await db.query('UPDATE users SET name = ?, photo = ? WHERE email = ?', [
+    await db.query('UPDATE users SET name = ?, photo = ?, profileImage = ? WHERE email = ?', [
       name,
       photo,
+      photo, // Sync profileImage with photo
       req.user.email
     ]);
 

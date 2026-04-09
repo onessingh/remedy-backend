@@ -37,8 +37,8 @@ passport.use(new GoogleStrategy({
     const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
     if (users.length > 0) {
-      // ✅ Update photo/profileImage if missing
-      if ((!users[0].photo || !users[0].profileImage) && photo) {
+      // ✅ Sync profile images
+      if (photo && (users[0].photo !== photo || users[0].profileImage !== photo)) {
         await db.query('UPDATE users SET photo = ?, profileImage = ? WHERE id = ?', [photo, photo, users[0].id]);
         users[0].photo = photo;
         users[0].profileImage = photo;
@@ -83,8 +83,8 @@ passport.use(new FacebookStrategy({
     const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
     if (users.length > 0) {
-      // ✅ Update photo/profileImage if missing
-      if ((!users[0].photo || !users[0].profileImage) && photo) {
+      // ✅ Sync profile images
+      if (photo && (users[0].photo !== photo || users[0].profileImage !== photo)) {
         await db.query('UPDATE users SET photo = ?, profileImage = ? WHERE id = ?', [photo, photo, users[0].id]);
         users[0].photo = photo;
         users[0].profileImage = photo;
