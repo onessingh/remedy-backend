@@ -40,7 +40,10 @@ router.post('/forgot-password', async (req, res) => {
             text: `Click this link to reset your password: ${resetLink}\nThis link will expire in 1 hour.`,
         };
 
-        await sendOTP(email, mailOptions);
+        // Send reset link in the background to prevent 504 Gateway Timeout
+        sendOTP(email, mailOptions)
+            .then(() => console.log(`✅ Reset link sent to ${email}`))
+            .catch(err => console.error('❌ Failed to send reset link in background:', err));
 
         res.json({ message: 'Password reset link sent successfully' });
     } catch (err) {
