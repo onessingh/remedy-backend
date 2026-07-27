@@ -26,7 +26,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: (process.env.FRONTEND_URL || 'http://localhost:5000') + '/auth/google/callback',
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/auth/google/callback',
   proxy: true // ✅ Trust Proxy for Render/Proxy environments
 }, async (accessToken, refreshToken, profile, done) => {
   try {
@@ -70,7 +70,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: (process.env.FRONTEND_URL || 'http://localhost:5000') + '/auth/facebook/callback',
+  callbackURL: process.env.FACEBOOK_CALLBACK_URL || 'http://localhost:5000/auth/facebook/callback',
   profileFields: ['id', 'displayName', 'emails', 'photos'], // ✅ Ensure photos are requested
   proxy: true // ✅ Trust Proxy for Render/Proxy environments
 }, async (accessToken, refreshToken, profile, done) => {

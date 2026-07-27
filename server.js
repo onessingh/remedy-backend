@@ -32,9 +32,25 @@ app.set('trust proxy', 1);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ✅ CORS Setup - Use FRONTEND_URL environment variable if available
+// ✅ CORS Setup - Allow both Netlify domains + localhost
+const allowedOrigins = [
+    'https://dybloghub.netlify.app',
+    'https://remedybloghub.netlify.app',
+    process.env.FRONTEND_URL,
+    'http://localhost:5500',
+    'http://localhost:3000',
+    'http://localhost:8080'
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5500',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 
@@ -150,7 +166,7 @@ app.listen(PORT, () => {
         req.setTimeout(10000, () => {
             req.destroy();
         });
-    }, 5 * 60 * 1000); // 5 minutes (to fix Render cold start)
+    }, 8 * 60 * 1000); // ✅ 8 minutes - prevents Render free tier from sleeping (sleeps after 15min)
 
     // ✅ Database Keep-alive (Every 10 minutes to prevent hibernation)
     setInterval(async () => {
