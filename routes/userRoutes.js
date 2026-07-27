@@ -338,7 +338,7 @@ router.get('/blogs/recent', async (req, res) => {
 
     } catch (err) {
         console.error("Recent blogs error:", err);
-        res.status(500).json({ error: "Failed to load recent blogs" });
+        res.status(500).json({ error: err.message, stack: err.stack });
     }
 });
 
