@@ -1,0 +1,25 @@
+name: Auto Commit to Keep Actions Alive
+
+on:
+  schedule:
+    - cron: "0 0 1 * *" # Runs at 00:00 on the 1st of every month
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  auto_commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update keep-alive file
+        run: |
+          echo "Last keep-alive ping: $(date)" > .github/keepalive.txt
+          
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/keepalive.txt
+          git commit -m "chore: auto-commit to keep GitHub Actions active" || echo "No changes to commit"
+          git push
